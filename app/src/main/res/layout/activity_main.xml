@@ -39,6 +39,15 @@
 
     </RelativeLayout>
 
-
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/timestamp"
+        android:padding="7dp"
+        android:layout_below="@id/progress_layout"
+        android:textColor="@color/white"
+        android:textAlignment="center"
+        android:text="2021 May 2020 05:00 PM"
+        />
 
 </RelativeLayout>

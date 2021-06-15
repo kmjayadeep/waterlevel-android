@@ -15,7 +15,11 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
+import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
+import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
@@ -23,6 +27,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var progressView: View
     private lateinit var progressText: TextView
+    private lateinit var timeView: TextView
     private lateinit var progressLayout: View
 
 
@@ -33,6 +38,7 @@ class MainActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_FULLSCREEN)
         setContentView(R.layout.activity_main)
         progressView = findViewById(R.id.progress_view)
+        timeView = findViewById(R.id.timestamp)
         progressLayout = findViewById(R.id.progress_layout)
         progressText = findViewById(R.id.progress_text)
     }
@@ -43,6 +49,16 @@ class MainActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val value = snapshot.value
                 Log.i("val", "Value is: $value")
+
+                val timestamp = snapshot.child("timestamp").getValue<Long>()
+                if (timestamp != null) {
+                    var calendar = Calendar.getInstance()
+                    val df = SimpleDateFormat(
+                        "MMM dd HH:mm:ss a", Locale.ENGLISH
+                    )
+                    calendar.timeInMillis = timestamp
+                    timeView.text = "Updated: " + df.format(calendar.time)
+                }
                 setPercentage(90)
             }
 
