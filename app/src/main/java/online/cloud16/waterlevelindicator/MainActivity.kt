@@ -47,7 +47,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun load() {
         val db = Firebase.database
-        db.getReference("/waterlevel/")
         db.getReference("/waterlevel").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val value = snapshot.value
