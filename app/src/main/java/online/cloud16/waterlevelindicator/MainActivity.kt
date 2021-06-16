@@ -34,8 +34,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
-        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN
+        )
         setContentView(R.layout.activity_main)
         progressView = findViewById(R.id.progress_view)
         timeView = findViewById(R.id.timestamp)
@@ -45,21 +47,42 @@ class MainActivity : AppCompatActivity() {
 
     private fun load() {
         val db = Firebase.database
+        db.getReference("/waterlevel/")
         db.getReference("/waterlevel").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val value = snapshot.value
                 Log.i("val", "Value is: $value")
 
                 val timestamp = snapshot.child("timestamp").getValue<Long>()
+                val distance = snapshot.child("measurement/distance").getValue<Int>()
                 if (timestamp != null) {
-                    var calendar = Calendar.getInstance()
+                    val calendar = Calendar.getInstance()
                     val df = SimpleDateFormat(
                         "MMM dd HH:mm:ss a", Locale.ENGLISH
                     )
                     calendar.timeInMillis = timestamp
-                    timeView.text = "Updated: " + df.format(calendar.time)
+                    timeView.text = "Updated: " + df.format(calendar.time) + "\nValue: " + distance
                 }
-                setPercentage(90)
+                val min = snapshot.child("min").getValue<Int>()
+                val max = snapshot.child("max").getValue<Int>()
+                var percentage = 0
+                if (min != null && max != null) {
+                    if (min >= max) {
+                        Log.i(TAG, "wrong min and max values")
+                        return;
+                    }
+                    if (distance == null) {
+                        Log.i(TAG, "No measurement available")
+                        return
+                    }
+                    val height = max - min
+                    if (distance > max || distance < min) {
+                        Log.i(TAG, "measurement out of range, skipping")
+                        return
+                    }
+                    percentage = (max - distance) * 100 / height
+                }
+                setPercentage(percentage)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -68,18 +91,18 @@ class MainActivity : AppCompatActivity() {
         });
     }
 
-    private fun setPercentage(n : Int) {
+    private fun setPercentage(n: Int) {
         progressText.text = "$n%"
         var maxHeight = progressLayout.height
         var height = n * maxHeight / 100
         var layoutParams = progressView.layoutParams
         layoutParams.height = height
         progressView.layoutParams = layoutParams
-        if(n<=25) {
+        if (n <= 25) {
             progressView.setBackgroundColor(Color.parseColor("#ff3333"))
-        }else if (n<=75) {
+        } else if (n <= 75) {
             progressView.setBackgroundColor(Color.parseColor("#0080ff"))
-        }else {
+        } else {
             progressView.setBackgroundColor(Color.parseColor("#4d4dff"))
         }
     }
