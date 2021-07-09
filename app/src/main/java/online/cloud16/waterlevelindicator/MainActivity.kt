@@ -54,13 +54,14 @@ class MainActivity : AppCompatActivity() {
 
                 val timestamp = snapshot.child("timestamp").getValue<Long>()
                 val distance = snapshot.child("measurement/distance").getValue<Int>()
+                val distDouble = snapshot.child("measurement/distance").getValue<Double>()
                 if (timestamp != null) {
                     val calendar = Calendar.getInstance()
                     val df = SimpleDateFormat(
                         "MMM dd HH:mm:ss a", Locale.ENGLISH
                     )
                     calendar.timeInMillis = timestamp
-                    timeView.text = "Updated: " + df.format(calendar.time) + "\nValue: " + distance
+                    timeView.text = "Updated: " + df.format(calendar.time) + "\nValue: " + distDouble
                 }
                 val min = snapshot.child("min").getValue<Int>()
                 val max = snapshot.child("max").getValue<Int>()
